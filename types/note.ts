@@ -9,7 +9,7 @@ export interface Note {
 
 export interface CreateNoteData {
   title: string;
-  content: string;
+  content?: string;
   tag: NoteTag;
 }
 

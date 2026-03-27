@@ -1,11 +1,12 @@
-import {createNote} from '../../services/noteService';
+
 import css from './NoteForm.module.css'
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import { object, string } from 'yup';
 import {useMutation, useQueryClient} from '@tanstack/react-query';
 import type {CreateNoteData} from '../../types/note';
+import { createNote } from '@/lib/api';
 
-const validationSchema = object({
+const validationSchema = object().shape({
   title: string()
   .min(3, 'Title must be at least 3 characters')
   .max(50, 'Title must be at most 50 characters')
