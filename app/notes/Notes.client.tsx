@@ -35,13 +35,13 @@ export default function NotesClient() {
 	<div className={css.app}>
 		<header className={css.toolbar}>
 			<SearchBox searchQuery={searchQuery} onChange={debouncedSearch} />
-			{/* {isSuccess
+			{isSuccess
 				&& notes?.notes.length > 0 
 				&& <Pagination 
 					totalPages={notes.totalPages} 
 					currentPage={currentPage} 
 					onPageChange={( selected ) => setCurrentPage(selected)}
-				 />} */}
+				 />}
 			{isLoading && <strong className={css.message}>Loading...</strong>}
 			{<button className={css.button} onClick={openModal}>
 				Create note +
