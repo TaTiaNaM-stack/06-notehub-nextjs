@@ -1,62 +1,43 @@
 'use client';
 
-import { fetchNotes } from "@/lib/api";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { useState } from "react";
-import { useDebouncedCallback } from "use-debounce";
-import css from "./NotesPage.module.css"
-import SearchBox from "@/components/SearchBox/SearchBox";
-import Pagination from "@/components/Pagination/Pagination";
-import NoteList from "@/components/NoteList/NoteList";
-import Modal from "@/components/Modal/Modal";
-import NoteForm from "@/components/NoteForm/NoteForm";
+import css from './NoteList.module.css';
+import type { Note } from '../../types/note';
 
-export default function NotesClient() {
-	const [searchQuery, setSearchQuery] = useState('');
-	const [currentPage, setCurrentPage] = useState(1);
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { deleteNote } from '@/lib/api';
+import Link from 'next/link';
 
-	const [isModalOpen, setIsModalOpen] = useState(false);
-	const openModal = () => setIsModalOpen(true);
-	const closeModal = () => setIsModalOpen(false);
+interface NoteListProps {
+  notes: Note[];
+}
 
-	const { data: notes, isSuccess, isLoading, error } = useQuery({
-		queryKey: ['notes', {currentPage, searchQuery}],
-		queryFn: () => fetchNotes(searchQuery, currentPage),
-		placeholderData: keepPreviousData,
-		refetchOnMount: false
-	});
+export default function NoteList({ notes }: NoteListProps) {
+  const queryClient = useQueryClient();
+  const { mutate } = useMutation({
+	mutationFn: deleteNote,
+	onSuccess: () => {
+	  queryClient.invalidateQueries({ queryKey: ['notes'] });
+	},
+	onError: (error) => {
+	  console.error('Error deleting note:', error);
+	}
+  });
 
-	const debouncedSearch = useDebouncedCallback ((value: string) => {
-		setSearchQuery(value);
-		setCurrentPage(1);
-	}, 1000);
-	
   return (
-	<div className={css.app}>
-		<header className={css.toolbar}>
-			<SearchBox searchQuery={searchQuery} onChange={debouncedSearch} />
-			{isSuccess
-				&& notes?.notes.length > 0 
-				&& <Pagination 
-					totalPages={notes.totalPages} 
-					currentPage={currentPage} 
-					onPageChange={( selected ) => setCurrentPage(selected)}
-				 />}
-			{isLoading && <strong className={css.message}>Loading...</strong>}
-			{<button className={css.button} onClick={openModal}>
-				Create note +
-			</button>}
-		</header>
-		{isSuccess 
-			&& notes.notes.length > 0 
-			? <NoteList notes={notes.notes} />
-			: <p className={css.message}>{error ? 'Error fetching notes' : 'No notes found'}</p>
-		}
-
-		{isModalOpen && (
-			<Modal onClose={closeModal}>
-				<NoteForm onClose={closeModal} />
-			</Modal>
-		)}
-	</div>
-  )}
+	<ul className={css.list}>
+	  {notes.map(note => (
+		<li key={note.id} className={css.listItem}>
+		  <h2 className={css.title}>{note.title}</h2>
+		  <p className={css.content}>{note.content}</p>
+		  <div className={css.footer}>
+			<span className={css.tag}>{note.tag}</span>
+			<Link href ={`/notes/${note.id}`}>View details</Link>
+			<button className={css.button} onClick={() => mutate(note.id)}>
+			  Delete
+			</button>
+		  </div>
+		</li>
+	  ))}
+	</ul>
+  )
+}
