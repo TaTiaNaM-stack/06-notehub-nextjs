@@ -30,8 +30,8 @@ const NoteDetailsClient = () => {
                   <h2>Note title</h2>
               </div>
               <p className={css.tag}>{note.tag}</p>
-              <p className={css.content}>Note content</p>
-              <p className={css.date}>Created date</p>
+              <p className={css.content}>{note.content}</p>
+              <p className={css.date}>{note.createdAt}</p>
           </div>
         </div>
      );
